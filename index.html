@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monglish Sales Simulator</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eef5f9;--card:#fff;--tx:#17303f;--mu:#5d7484;--bl:#17608a;--or:#f47b20;--bd:#d5e3ec;--par:#dcecf6;--ans:#fff1e4;--g:#dcfce7;--y:#fef3c7;--r:#fee2e2}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1c26;--card:#172a38;--tx:#eaf2f7;--mu:#9bb2c1;--bl:#4fb0e6;--bd:#28425a;--par:#1f3a4d;--ans:#3a2a1a;--g:#12331f;--y:#3a2e10;--r:#3b1616}}
+:root[data-theme="dark"]{--bg:#0f1c26;--card:#172a38;--tx:#eaf2f7;--mu:#9bb2c1;--bl:#4fb0e6;--bd:#28425a;--par:#1f3a4d;--ans:#3a2a1a;--g:#12331f;--y:#3a2e10;--r:#3b1616}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Tahoma,"Segoe UI",sans-serif;line-height:1.75;font-size:16px}
+body.big{font-size:21px}
+header{background:linear-gradient(135deg,#17608a,#f47b20);color:#fff;padding:18px 16px;border-radius:0 0 22px 22px;text-align:center}
+h1{margin:0;font-size:22px;direction:ltr}header p{margin:4px 0 0;font-size:13px;opacity:.9}
+main{max-width:680px;margin:auto;padding:12px 14px 40px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 2px 8px #0001}
+h2{font-size:1em;color:var(--bl);margin:0 0 6px}
+label{display:block;font-size:.8em;color:var(--mu);margin-top:8px}
+input,select{width:100%;padding:9px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;box-sizing:border-box}
+.chk label{display:inline-flex;gap:4px;align-items:center;margin:4px 0 0 4px;padding:4px 10px;border:1px solid var(--bd);border-radius:20px;color:var(--tx)}
+.chk input{width:auto}
+button{font:inherit;cursor:pointer;border-radius:12px;border:0;background:var(--or);color:#fff;padding:11px 18px;margin:10px 4px 0 0;font-weight:bold}
+button.b{background:var(--bl)}button.g{background:none;color:var(--bl);border:1px solid var(--bl)}
+.rt{display:flex;gap:6px;flex-wrap:wrap}.rt button{flex:1;color:var(--tx)}
+.r2{background:var(--g)}.r1{background:var(--y)}.r0{background:var(--r)}
+.p{background:var(--par);border-radius:16px 16px 16px 3px;padding:10px 13px;margin:9px 0;max-width:90%}
+.a{background:var(--ans);border:2px solid var(--or);border-radius:16px;padding:12px;margin:10px 0}
+.task{background:var(--card);border-right:5px solid var(--or);border-radius:10px;padding:10px 12px;margin:12px 0}
+.ph{font-size:.8em;font-weight:bold;color:#fff;background:var(--bl);display:inline-block;border-radius:20px;padding:2px 14px;margin-top:14px}
+.tag{font-size:.75em;background:var(--or);color:#fff;border-radius:8px;padding:1px 9px;margin-left:6px}
+.bar{height:10px;background:var(--bd);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--bl),var(--or));transition:width .4s}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}.top button{margin:0;padding:5px 12px}
+.lg{border-radius:10px;padding:8px 10px;margin-top:6px;font-size:.85em}
+[hidden]{display:none}
+</style></head><body>
+<header><h1>🎯 Monglish Sales Simulator</h1><p>تدرّب على مكالمة البيع كأنها حقيقية</p></header>
+<main>
+<section id="setup">
+<div class="c"><h2>👤 ولي الأمر: م/عبد الرحمن</h2>
+<label>الدولة</label><select id="cty"><option>السعودية</option><option>الإمارات</option><option>الكويت</option><option>قطر</option><option>البحرين</option><option>عمان</option></select>
+<label>عدد المشتركين</label><select id="n" onchange="cards()"><option>1</option><option selected>2</option><option>3</option></select></div>
+<div id="sts"></div>
+<button onclick="start()">ابدأ المكالمة ▶</button><button class="g" onclick="cards()">🎲 حالة عشوائية</button>
+</section>
+<section id="sim" hidden>
+<div class="top"><small id="pt"></small><button class="b" onclick="document.body.classList.toggle('big')">A+</button></div>
+<div class="bar"><i id="pb" style="width:0"></i></div>
+<div id="chat"></div><div id="opts"></div>
+</section>
+<section id="end" class="c" hidden></section>
+</main>
+<script>
+const $=id=>document.getElementById(id),rnd=a=>a[Math.random()*a.length|0],PAR="م/عبد الرحمن";
+const M=["أحمد","محمد","عبدالله","يوسف","خالد","سلطان","فيصل","ريان"],F=["سارة","نورة","ليان","ريم","لجين","مريم"],
+SCH=["مدرسة أهلية","مدرسة خاصة","مدرسة دولية","مدرسة بريطانية"],
+GOALS=["تأسيس اللغة من الصفر (Foundation)","تحسين درجاته في المدرسة","الثقة في الكلام بطلاقة","التحضير لاختبار دولي (IELTS)","السفر والدراسة بالخارج"],
+DIFFS=["خوف من التحدث","النطق واللكنة","القراءة","الكتابة","الاستماع والفهم","القواعد","المفردات","مستوى عام"],
+HIST=["ما درس إنجليزي خارج المدرسة","جرّب سنتر قبل كده وما استفادش كتير"];
+const stage=a=>a<=7?"Foundation":a<=11?"Juniors":a<=17?"Teens":"Adults";
+const opt=(a,v)=>a.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('');
+function mk(){const g=Math.random()<.6?'m':'f';return{name:rnd(g=='m'?M:F),age:5+(Math.random()*12|0),sch:rnd(SCH),goal:rnd(GOALS),diffs:[rnd(DIFFS.slice(0,7))],hist:rnd(HIST)}}
+function cards(){$('sts').innerHTML=Array.from({length:+$('n').value},(_,k)=>{const s=mk();return `<div class="c st" data-h="${s.hist}"><h2>الطالب ${k+1}</h2>
+<label>الاسم</label><input value="${s.name}"><label>السن</label><input type="number" value="${s.age}">
+<label>المدرسة</label><select>${opt(SCH,s.sch)}</select><label>الهدف الرئيسي</label><select>${opt(GOALS,s.goal)}</select>
+<label>الصعوبات</label><div class="chk">${DIFFS.map(x=>`<label><input type="checkbox" value="${x}" ${s.diffs.includes(x)?'checked':''}>${x}</label>`).join('')}</div></div>`}).join('')}
+cards();
+// [سؤال المشكلة, ربط النادي]
+const DQ={"خوف من التحدث":["لما {n} بيتكلم إنجليزي قدام حد، إيه اللي بيحصل بالظبط؟ بيسكت ولا بيتلخبط؟","نادي المحادثة: مساحة يومية بدون مدرس مع زميل (حتى 4 طلاب) تكسر الخوف، ونادي المناظرات شهرياً يبني ثقته قدام الناس"],
+"النطق واللكنة":["لما {n} بيقرأ أو يتكلم، النطق بيخلي اللي حواليه ما يفهموش؟","نادي السينما بلهجة أمريكية وتكرار الجمل مع المدرس، ونادي الصوتيات لضبط مخارج الحروف"],
+"القراءة":["لما {n} بيقرأ نص إنجليزي، بيبقى بطيء ولا بيتلخبط في الكلمات؟","نادي القراءة: جلسة فردية أسبوعية 5 إلى 10 دقائق مع مدرس يصحح فورياً"],
+"الكتابة":["لما {n} بيكتب موضوع بالإنجليزي، المشكلة في الأفكار ولا الكلمات ولا القواعد؟","نادي الكتابة: أسبوعي ساعة ونصف على الكتابة الأكاديمية (من مرحلة Senior)"],
+"الاستماع والفهم":["لما {n} بيسمع فيلم أو مدرس بيتكلم إنجليزي، بيفهم كام في المية تقريباً؟","نادي السينما (مشاهد بدون ترجمة) ونادي الغناء لتدريب الأذن"],
+"القواعد":["لما {n} بيكوّن جمل، بيغلط في القواعد ولا في ترتيب الكلمات؟","الحصص الأساسية بمنهج كامبريدج لتأسيس القواعد، ونادي Spelling Bee لتطبيقها بشكل ممتع"],
+"المفردات":["لما {n} بيحاول يعبر عن فكرة، بيلاقي كلمات ناقصة؟","نادي الرسم ونادي المواهب لتوسيع المفردات في أنشطة ممتعة"],
+"مستوى عام":["لما {n} بيتعامل مع الإنجليزي، إيه أكتر موقف حسّيتك إنه محتاج تأسيس؟","الحصص الأساسية لتأسيس اللغة من الصفر، ونادي الرسم والمواهب لترسيخها بشكل ممتع"]};
+const SQ={"مدرسة بريطانية":"ومدرسته بريطانية وبتركز على المحادثة والاستماع، وغالباً القراءة والكتابة أضعف، هل ده ينطبق عليه؟","مدرسة دولية":"ومدرسته دولية، هل بيلاقي صعوبة يتابع المواد بالإنجليزي مع زمايله؟","مدرسة خاصة":"ومدرسته خاصة، هل بتدي وقت كفاية للمحادثة الفعلية؟","مدرسة أهلية":"ومدرسته أهلية بتركز على المنهج والدرجات، هل بتدي وقت كفاية للمحادثة؟"};
+const OBJ=[["السعر غالي شوية بالنسبة لي.","فاهم إحساس حضرتك (Feel)، وكتير من أولياء الأمور حسّوا كده في البداية (Felt)، ولقوا (Found) إن التكلفة استثمار في مستقبل ولدهم، لأن النتيجة حل مشكلته كلها مش مجرد ساعات. وأقدر أقسم السعر لسعر ساعة معايشة أو أفعّل التقسيط المباشر، تحب أوضحه؟"],
+["إيش يضمن لي إنكم موجودين بعد ما أدفع؟","متفهم قلقك (Feel)، وأولياء أمور كتير سألوا نفس السؤال (Felt)، ولقوا (Found) إننا جهة دولية موثقة: 3 شهادات ISO واعتماد هيئة المعرفة بدبي ومقرات في لندن ونيويورك ودبي والرياض. والدفع بيتم بس عن طريق موقعنا الرسمي أو رابط دفع رسمي مني، وتقدر تراجع كل ده بنفسك."],
+["أنا أفضل حصص فردية لولدي.","فاهم وجهة نظرك (Feel)، وكتير كانوا شايفين كده (Felt)، لكنهم لقوا (Found) إن اللغة بتتكتسب بالممارسة الجماعية؛ الفردي مساحة أمان، لكن الطالب بيتعثر قدام مجموعة. عشان كده النوادي والمناظرات بتبني ثقة حقيقية، ومعاه مشرف فصل يتابعه."],
+["أخاف الأونلاين ما يركز فيه ولدي.","حاسس بقلقك (Feel)، وأولياء أمور تانيين قالوا نفس الكلام (Felt)، ولقوا (Found) إن الأونلاين بيوفر التنقل والمجهود فبيركز في التعلم، والكاميرا مفتوحة طوال الحصة، والحصص مسجلة، ومشرف الفصل بيتابع ويبعتلك تقارير. وحضرتك شفت تفاعله بنفسك في الحصة التجريبية."],
+["هفكر وأرد عليك.","أكيد. عشان أساعدك تقرر، إيه النقطة اللي محتاجة توضيح: السعر ولا الطريقة؟ وهل في حد تاني لازم يشارك في القرار؟ ونحدد سوا معاد متابعة بعد يومين."],
+["نادي المحادثة من غير مدرس؟ مش هيقدر يتكلم.","متفهم (Feel)، وأولياء أمور كتير استغربوا (Felt)، ولقوا (Found) إن غياب المدرس هو اللي بيكسر الخوف: زي ما حضرتك بترتاح مع صديق أكتر من لجنة تقييم. والمدرس بيدّي مهام قبل النادي ويصحح في الحصص طول الأسبوع."]];
+let steps=[],i,sc,log;
+const add=(ph,tech,task,ans,r,q)=>steps.push({ph,tech,task,ans,r,q});
+function start(){
+ const st=[...document.querySelectorAll('.st')].map(e=>{const n=e.querySelectorAll('input'),sl=e.querySelectorAll('select');
+  const d=[...e.querySelectorAll('.chk input:checked')].map(x=>x.value);return{name:n[0].value,age:+n[1].value,sch:sl[0].value,goal:sl[1].value,diffs:d.length?d:["مستوى عام"],hist:e.dataset.h}});
+ const C=$('cty').value,all=st.map(s=>s.name).join(' و '),ds=[...new Set(st.flatMap(s=>s.diffs))].join(' و '),gs=[...new Set(st.map(s=>s.goal))].join(' و ');
+ const P1="الجزء 1: أول مكالمة",P2="الجزء 2: بعد الحصة التجريبية";steps=[];
+ add(P1,"Ice Breaking","افتتح المكالمة: سلّم، عرّف بنفسك وبالأكاديمية، وتأكد إنه تواصل معاكم",`ألو مساء الخير ${PAR}، إزاي حضرتك؟ معاك [اسمك] مرشد تعليمي من أكاديمية مونجلش الدولية. حضرتك تواصلت معانا بخصوص كورس الإنجليزي عن طريق السوشيال ميديا؟`,`أهلاً بيك، أيوه أنا كنت سألت عن الكورس.`);
+ add(P1,"Situation","اعرف الكورس لمين وعدد المشتركين",`تشرفنا يا ${PAR}. الكورس لمين حضرتك؟ ولحد واحد بس ولا أكتر؟`,`الكورس لـ${all}.`);
+ st.forEach(s=>{const n=s.name,d=s.diffs.join(' و ');
+  add(P1,"Situation",`اجمع بيانات ${n}: السن والمدرسة والتاريخ الدراسي`,`${n} عنده كام سنة وبيدرس في مدرسة إيه: أهلية ولا خاصة ولا دولية؟ وهل جرّب دراسة الإنجليزي في مكان تاني قبل كده؟`,`${n} عنده ${s.age} سنة في ${s.sch}. ${s.hist}.`);
+  add(P1,"Need Assessment",`اعرف هدف ${n} وصعوباته في اللغة`,`وإيه الهدف الأساسي من الكورس لـ${n}؟ وإيه أكتر حاجة بتلاحظ إنها بتصعب عليه: التحدث ولا القراءة ولا الكتابة ولا الاستماع؟`,`الهدف "${s.goal}"، ومشكلته: ${d}.`)});
+ add(P1,"Close مبدئي","اعرض الحصة المجانية (تحديد مستوى أولي + ترشيح الباقة) واتفق على معاد",`متاح حصة تجريبية مجانية مع أحد خبرائنا لتحديد مستوى ${all} بشكل أولي، وترشيح الباقة الأنسب، ومعرفة تفاعله مع التعليم الأونلاين. تفضل نحجزها بكرة ولا بعده؟ وأنسب وقت لحضرتك بتوقيت ${C}؟`,`بكرة الساعة 6 مناسبة.`);
+ add(P1,"Confirm","أكّد الحجز وجهّزه للحصة",`تمام، حجزنا لـ${all} بكرة الساعة 6. هبعتلك رابط الحصة، ويُفضل لابتوب وكاميرا مفتوحة ومكان هادئ. ونتكلم بعد الحصة إن شاء الله.`,`تمام، شكراً.`);
+ add(P2,"Feedback","اتصل بعد الحصة واسأله عن رأيه",`أهلاً ${PAR}، عساك بخير. إيه رأي حضرتك في الحصة التجريبية؟ وإيه أكتر حاجة لفتت نظرك في تفاعل ${all}؟`,`الحصة حلوة، والمدرس شاف ${st[0].name} في مرحلة ${stage(st[0].age)} ورشح باقة المعايشة بلس.`);
+ st.forEach(s=>{const n=s.name;add(P2,"SPIN: Problem",`اسأل سؤال استكشافي مناسب لحالة ${n} (مشكلة ${s.diffs[0]}، ${s.sch})`,DQ[s.diffs[0]][0].replace('{n}',n)+" "+SQ[s.sch],`أيوه بالظبط، ده اللي بيحصل مع ${n}.`)});
+ add(P2,"Credibility","قبل الباقة: عرّف بمونجلش وأهم الاعتمادات وإيه اللي بتضمنه، واسأله لو عنده سؤال",`مونجلش أكاديمية دولية مقرها الرئيسي لندن ولها مقرات في نيويورك ودبي والرياض والقاهرة. أهم اعتماداتنا: شهادات ISO في جودة الإدارة والتعليم، واعتماد هيئة المعرفة (KHDA) في دبي، وتسجيل حقوق المنهج في مكتبة الكونجرس. يعني جودة التعليم بتتراجع من جهات مستقلة، والمنهج حصري ومحمي، فـ${all} في إيد أمينة. في أي نقطة عن الاعتمادات مش واضحة قبل ما أشرح المنهج؟`,`ما شاء الله، كل حاجة واضحة، كمل.`);
+ add(P2,"Explain Method","اشرح يعني إيه منهج المعايشة",`منهج المعايشة فلسفة تعليمية بيعيش فيها الطالب اللغة يومياً بدل ما يحفظها: حصص أساسية بمنهج معتمد لتأسيس القواعد والحصيلة، ونوادي تفاعلية يطبق فيها اللي اتعلمه في مواقف حقيقية. وبكده بيوصل للطلاقة أسرع بكتير من الطرق التقليدية. الفكرة واضحة؟`,`واضحة، طيب الباقة اللي رشحها المدرس إيه بالظبط؟`);
+ st.forEach(s=>{const n=s.name,d=s.diffs.join(' و ');
+  add(P2,"Link Need with Package",`اشرح المعايشة بلس واربط النوادي بمشكلة ${n}`,`الباقة المرشحة لـ${n} هي المعايشة بلس، لأنها أسرع طريق للطلاقة. ومشكلته في ${d}، فهنركز على: ${DQ[s.diffs[0]][1]}. يعني كل نادي بيعالج جزء من المشكلة اللي حكيتها. واضح لحد هنا؟`,`واضح.`);
+  add(P2,"SPIN: Implication",`اعمل Implication: ضخّم مشكلة ${n} بشكل بسيط عشان يحس إنها لازم تتحل قريب`,`لو ${d} ما اتعالجتش دلوقتي، الفجوة بتكبر مع كل سنة دراسية، و${n} ممكن يفقد ثقته قدام زمايله ويبعد عن هدفه "${s.goal}". تفتكر تأثير ده عليه السنة الجاية هيكون إيه؟`,`أكيد هيأثر، لازم نلحق الموضوع.`)});
+ const ob=OBJ.slice(1).sort(()=>Math.random()-.5);
+ add(P2,"FFF","اعتراض في نص الشرح: رد بـFeel-Felt-Found ووضّح ببساطة",ob[0][1],`تمام، فهمت.`,ob[0][0]);
+ add(P2,"Close 1: Confirm the Need","أكّد الاحتياج",`يعني يا ${PAR}، لو فهمتك صح، أهم حاجة عندك "${gs}" وإن مشكلة ${ds} تتحل في أقرب وقت، صح كده؟`,`صح بالظبط.`);
+ add(P2,"Close 2: Link the Value","اربط الباقة بالاحتياج",`الباقة المعايشة بلس بتحقق ده لأن فيها الحصص الأساسية بمنهج معتمد، ونوادي مركزة على ${ds}، ومشرف فصل بيبعتلك تقرير بعد كل حصة، وتدريب مكثف بيوصل ${all} للطلاقة أسرع.`,`ده منطقي جداً.`);
+ add(P2,"Close 3: Overcome Risk","اسأله عن أي تخوف قبل البدء",`قبل ما نبدأ، في أي نقطة لسه شاغلة بالك أو محتاجة توضيح؟`,`في حاجة عايز أسأل عنها…`);
+ add(P2,"FFF","اعتراض في مرحلة Overcome Risk: رد بـFFF",ob[1][1],`تمام، اطمنت.`,ob[1][0]);
+ add(P2,"Close 4: Suggest Next Step","اقترح الخطوة الجاية",`تمام. الخطوة الجاية نثبت مقاعد ${all} في مرحلة ${stage(st[0].age)}، ونبدأ الأسبوع ده. أنسب لحضرتك يوم كذا ولا بعده؟`,`تمام، طيب السعر كام؟`);
+ add(P2,"الجانب المادي","اعرض السعر بعد ما بنيت القيمة، ووضّح طرق الدفع",`باقة المعايشة بلس لـ${all} بسعر [السعر] وعليها العرض الحالي، وفي تقسيط مباشر ونقدر نثبت المقعد بمبلغ مبدئي. والدفع بيتم فقط عن طريق موقعنا الرسمي أو رابط دفع مباشر مني.`,`السعر مرتفع شوية.`,OBJ[0][0]);
+ add(P2,"FFF","اعتراض السعر: رد بـFFF",OBJ[0][1],`طيب، ده مقنع.`);
+ add(P2,"Close 5: Execute the Sale","نفّذ البيع",`ممتاز. هبعتلك رابط الدفع الرسمي دلوقتي وأفضل معاك على الخط لحد ما تتم العملية، وبعدها أعرفك على مشرف الفصل ونبدأ.`,`تمام، ابعت الرابط.`);
+ i=0;sc=0;log=[];$('chat').innerHTML='';$('setup').hidden=true;$('end').hidden=true;$('sim').hidden=false;show()}
+function show(){
+ if(i>=steps.length)return finish();const s=steps[i],c=$('chat');
+ if(!i||steps[i-1].ph!=s.ph)c.insertAdjacentHTML('beforeend',`<div class="ph">${s.ph}</div>`);
+ if(s.q)c.insertAdjacentHTML('beforeend',`<div class="p">👤 ${s.q}</div>`);
+ c.insertAdjacentHTML('beforeend',`<div class="task"><b>🎤 دورك:</b> ${s.task}<br><small>قولها بصوتك الأول، وبعدين اكشف الإجابة</small></div>`);
+ $('opts').innerHTML=`<button onclick="rev()">👁️ أظهر الإجابة النموذجية</button>`;
+ $('pb').style.width=(i/steps.length*100)+'%';$('pt').textContent=`خطوة ${i+1} من ${steps.length}`;scrollTo(0,document.body.scrollHeight)}
+function rev(){const s=steps[i];
+ $('chat').insertAdjacentHTML('beforeend',`<div class="a"><span class="tag">${s.tech}</span><br>${s.ans}</div>`);
+ $('opts').innerHTML=`<div class="rt"><button class="r2" onclick="rate(2)">✅ قلتها تقريباً</button><button class="r1" onclick="rate(1)">🟡 قلت جزء</button><button class="r0" onclick="rate(0)">❌ فاتتني</button></div>`;scrollTo(0,document.body.scrollHeight)}
+function rate(v){const s=steps[i];sc+=v;log.push([s.tech,v,s.ph]);
+ $('chat').insertAdjacentHTML('beforeend',`<div class="p">👤 ${s.r}</div>`);
+ $('opts').innerHTML=`<button class="b" onclick="i++;show()">التالي ◀</button>`;scrollTo(0,document.body.scrollHeight)}
+function finish(){$('sim').hidden=true;$('end').hidden=false;const pc=Math.round(sc/(steps.length*2)*100),m={2:'r2',1:'r1',0:'r0'};
+ $('end').innerHTML=`<h2>🏁 النتيجة: ${pc}%</h2><div class="bar"><i style="width:${pc}%"></i></div><p>${pc>=80?'ممتاز! ترتيب أسئلتك سليم.':pc>=55?'كويس، راجع الخطوات الملونة بالأصفر والأحمر.':'محتاج تراجع الترتيب: احتياج قبل عرض، وقيمة قبل سعر.'}</p>`+log.map(l=>`<div class="lg ${m[l[1]]}"><b>${l[2]}</b> · ${l[0]}</div>`).join('')+`<button onclick="location.reload()">حالة جديدة 🔁</button>`}
+</script></body></html>
